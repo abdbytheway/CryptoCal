@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Profit/Loss Calculator</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #a5b4fc;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --card-bg: #ffffff;
+      --border-radius: 12px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--dark), #0f172a);
+      color: var(--light);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 500px;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+    
+    .card-header {
+      background: var(--primary);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .card-header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+    
+    .card-header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .crypto-icon {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 24px;
+    }
+    
+    .card-body {
+      padding: 25px;
+      color: var(--dark);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+    
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 6px;
+      background-color: var(--primary);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .tip-banner {
+      background-color: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid var(--warning);
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+    }
+
+    .tip-banner .emoji {
+      font-size: 24px;
+      margin-right: 10px;
+    }
+
+    .tip-banner .tip-text {
+      font-size: 14px;
+      color: var(--dark);
+    }
+    
+    .result {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      display: none;
+    }
+    
+    .result h2 {
+      margin-bottom: 15px;
+      color: var(--dark);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .result h2 .emoji {
+      margin-right: 8px;
+      font-size: 24px;
+    }
+    
+    .result-item {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .result-item .label {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--dark);
+    }
+    
+    .result-item .value {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+    
+    .profit {
+      color: var(--success);
+    }
+    
+    .loss {
+      color: var(--danger);
+    }
+    
+    .scenarios {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+    
+    .scenario {
+      width: 48%;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    
+    .stop-loss {
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+    
+    .take-profit {
+      background-color: rgba(16, 185, 129, 0.1);
+    }
+    
+    .scenario .title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+    }
+
+    .scenario .title .emoji {
+      margin-right: 8px;
+    }
+    
+    @media (max-width: 500px) {
+      .card-header h1 {
+        font-size: 20px;
+      }
+      
+      .scenarios {
+        flex-direction: column;
+      }
+      
+      .scenario {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+
+    .risk-reward-indicator {
+      margin-top: 5px;
+      font-size: 14px;
+      font-weight: normal;
+    }
+
+    .poor-ratio {
+      color: var(--danger);
+    }
+
+    .good-ratio {
+      color: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h1>Crypto Profit/Loss Calculator</h1>
+        <p>Plan your trades, manage your risk</p>
+        <div class="crypto-icon">₿</div>
+      </div>
+      <div class="card-body">
+        <div class="tip-banner">
+          <div class="emoji">💡</div>
+          <div class="tip-text">For better risk management, aim for a risk-to-reward ratio of at least 1:2 or higher.</div>
+        </div>
+
+        <form id="calc-form">
+          <div class="form-group">
+            <label for="capital">Initial Capital ($)</label>
+            <input type="number" id="capital" step="0.01" min="0" required placeholder="1000">
+          </div>
+          
+          <div class="form-group">
+            <label for="entry-price">Entry Price ($)</label>
+            <input type="number" id="entry-price" step="0.000001" min="0.000001" required placeholder="0.000001">
+          </div>
+          
+          <div class="form-group">
+            <label for="stop-loss">Stop Loss Price ($)</label>
+            <input type="number" id="stop-loss" step="0.000001" min="0.000001" required placeholder="0.000001">
+          </div>
+          
+          <div class="form-group">
+            <label for="take-profit">Take Profit Price ($)</label>
+            <input type="number" id="take-profit" step="0.000001" min="0.000001" required placeholder="0.000001">
+          </div>
+          
+          <button type="submit" class="btn">Calculate</button>
+        </form>
+        
+        <div class="result" id="result">
+          <h2><span class="emoji">✅</span>Trade Analysis</h2>
+          
+          <div class="result-item">
+            <div class="label">Coin Amount</div>
+            <div class="value" id="coin-amount">0 coins</div>
+          </div>
+          
+          <div class="scenarios">
+            <div class="scenario stop-loss">
+              <div class="title"><span class="emoji">⚠️</span>If Stop Loss Hits</div>
+              <div class="label">Loss Amount</div>
+              <div class="value loss" id="sl-amount">-$0.00</div>
+              <div class="label">Capital After Loss</div>
+              <div class="value" id="capital-after-sl">$0.00</div>
+              <div class="label">Loss Percentage</div>
+              <div class="value loss" id="sl-percentage">-0.00%</div>
+            </div>
+            
+            <div class="scenario take-profit">
+              <div class="title"><span class="emoji">✅</span>If Take Profit Hits</div>
+              <div class="label">Profit Amount</div>
+              <div class="value profit" id="tp-amount">+$0.00</div>
+              <div class="label">Capital After Profit</div>
+              <div class="value" id="capital-after-tp">$0.00</div>
+              <div class="label">Profit Percentage</div>
+              <div class="value profit" id="tp-percentage">+0.00%</div>
+            </div>
+          </div>
+          
+          <div class="result-item">
+            <div class="label">Risk to Reward Ratio</div>
+            <div class="value" id="risk-reward">1:1</div>
+            <div class="risk-reward-indicator" id="ratio-indicator"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('calc-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get input values
+      const capital = parseFloat(document.getElementById('capital').value);
+      const entryPrice = parseFloat(document.getElementById('entry-price').value);
+      const stopLossPrice = parseFloat(document.getElementById('stop-loss').value);
+      const takeProfitPrice = parseFloat(document.getElementById('take-profit').value);
+      
+      // Validate inputs
+      if (isNaN(capital) || isNaN(entryPrice) || isNaN(stopLossPrice) || isNaN(takeProfitPrice)) {
+        alert('Please enter valid numeric values for all fields.');
+        return;
+      }
+      
+      if (entryPrice <= 0 || stopLossPrice <= 0 || takeProfitPrice <= 0) {
+        alert('All prices must be greater than zero.');
+        return;
+      }
+      
+      // Calculate coin amount
+      const coinAmount = capital / entryPrice;
+      
+      // Calculate stop loss scenario
+      const slDifference = stopLossPrice - entryPrice;
+      const slAmount = slDifference * coinAmount;
+      const capitalAfterSL = capital + slAmount;
+      const slPercentage = (slAmount / capital) * 100;
+      
+      // Calculate take profit scenario
+      const tpDifference = takeProfitPrice - entryPrice;
+      const tpAmount = tpDifference * coinAmount;
+      const capitalAfterTP = capital + tpAmount;
+      const tpPercentage = (tpAmount / capital) * 100;
+      
+      // Calculate risk to reward ratio
+      const risk = Math.abs(slAmount);
+      const reward = Math.abs(tpAmount);
+      const riskRewardRatio = (reward / risk).toFixed(2);
+      
+      // Display results
+      document.getElementById('coin-amount').textContent = `${coinAmount.toFixed(8)} coins`;
+      
+      document.getElementById('sl-amount').textContent = `${slAmount.toFixed(2) >= 0 ? '+' : ''}$${slAmount.toFixed(2)}`;
+      document.getElementById('capital-after-sl').textContent = `$${capitalAfterSL.toFixed(2)}`;
+      document.getElementById('sl-percentage').textContent = `${slPercentage.toFixed(2) >= 0 ? '+' : ''}${slPercentage.toFixed(2)}%`;
+      
+      document.getElementById('tp-amount').textContent = `${tpAmount.toFixed(2) >= 0 ? '+' : ''}$${tpAmount.toFixed(2)}`;
+      document.getElementById('capital-after-tp').textContent = `$${capitalAfterTP.toFixed(2)}`;
+      document.getElementById('tp-percentage').textContent = `${tpPercentage.toFixed(2) >= 0 ? '+' : ''}${tpPercentage.toFixed(2)}%`;
+      
+      document.getElementById('risk-reward').textContent = `1:${riskRewardRatio}`;
+      
+      // Add risk-reward ratio indicator with emojis
+      const ratioIndicator = document.getElementById('ratio-indicator');
+      if (parseFloat(riskRewardRatio) >= 2) {
+        ratioIndicator.textContent = '✅ Good risk-to-reward ratio';
+        ratioIndicator.className = 'risk-reward-indicator good-ratio';
+      } else {
+        ratioIndicator.textContent = '⚠️ Consider a better risk-to-reward ratio (aim for 1:2 or higher)';
+        ratioIndicator.className = 'risk-reward-indicator poor-ratio';
+      }
+      
+      // Show result section
+      document.getElementById('result').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
